@@ -5090,9 +5090,11 @@ void CanvasItemEditor::set_state(const Dictionary &p_state) {
 }
 
 void CanvasItemEditor::clear() {
-	zoom = 1.0 / MAX(1, EDSCALE);
+	zoom = 8.0;
 	zoom_widget->set_zoom(zoom);
 
+	// TODO this needs to math a bit because at 150% editor scale it looks good
+	// but at 100% editor scale it's too far down-right (correct placement about half this?)
 	view_offset = Point2(-150 - RULER_WIDTH, -95 - RULER_WIDTH);
 	previous_update_view_offset = view_offset; // Moves the view a little bit to the left so that (0,0) is visible. The values a relative to a 16/10 screen.
 	_update_scrollbars();

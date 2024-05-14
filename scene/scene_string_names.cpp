@@ -63,7 +63,7 @@ SceneStringNames::SceneStringNames() {
 	RESET = StaticCString::create("RESET");
 
 	pose_updated = StaticCString::create("pose_updated");
-	bone_pose_changed = StaticCString::create("bone_pose_changed");
+	skeleton_updated = StaticCString::create("skeleton_updated");
 	bone_enabled_changed = StaticCString::create("bone_enabled_changed");
 	show_rest_only_changed = StaticCString::create("show_rest_only_changed");
 
@@ -132,7 +132,6 @@ SceneStringNames::SceneStringNames() {
 	_unhandled_input = StaticCString::create("_unhandled_input");
 	_unhandled_key_input = StaticCString::create("_unhandled_key_input");
 
-	changed = StaticCString::create("changed");
 	_shader_changed = StaticCString::create("_shader_changed");
 
 	_spatial_editor_group = StaticCString::create("_spatial_editor_group");
@@ -146,10 +145,6 @@ SceneStringNames::SceneStringNames() {
 	rotate = StaticCString::create("rotate");
 	h_offset = StaticCString::create("h_offset");
 	v_offset = StaticCString::create("v_offset");
-
-	transform_pos = StaticCString::create("position");
-	transform_rot = StaticCString::create("rotation");
-	transform_scale = StaticCString::create("scale");
 
 	_update_remote = StaticCString::create("_update_remote");
 	_update_pairs = StaticCString::create("_update_pairs");
@@ -196,7 +191,7 @@ SceneStringNames::SceneStringNames() {
 	// Audio bus name.
 	Master = StaticCString::create("Master");
 
-	_default = StaticCString::create("default");
+	default_ = StaticCString::create("default");
 
 	_window_group = StaticCString::create("_window_group");
 	_window_input = StaticCString::create("_window_input");
@@ -209,6 +204,8 @@ SceneStringNames::SceneStringNames() {
 
 	shader_overrides_group = StaticCString::create("_shader_overrides_group_");
 	shader_overrides_group_active = StaticCString::create("_shader_overrides_group_active_");
+
+	pressed = StaticCString::create("pressed");
 
 #ifndef DISABLE_DEPRECATED
 	use_in_baked_light = StaticCString::create("use_in_baked_light");

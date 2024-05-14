@@ -45,7 +45,7 @@
 #endif //RD_ENABLED
 
 #ifdef GLES3_ENABLED
-#include "wayland/egl_manager_wayland.h"
+#include "drivers/egl/egl_manager.h"
 #endif
 
 #if defined(SPEECHD_ENABLED)
@@ -59,8 +59,6 @@
 
 #include "core/config/project_settings.h"
 #include "core/input/input.h"
-#include "scene/resources/atlas_texture.h"
-#include "scene/resources/texture.h"
 #include "servers/display_server.h"
 
 #include <limits.h>
@@ -128,12 +126,13 @@ class DisplayServerWayland : public DisplayServer {
 #endif
 
 #ifdef GLES3_ENABLED
-	EGLManagerWayland *egl_manager = nullptr;
+	EGLManager *egl_manager = nullptr;
 #endif
 
 #ifdef SPEECHD_ENABLED
 	TTS_Linux *tts = nullptr;
 #endif
+	NativeMenu *native_menu = nullptr;
 
 #if DBUS_ENABLED
 	FreeDesktopPortalDesktop *portal_desktop = nullptr;
@@ -277,7 +276,6 @@ public:
 	virtual void process_events() override;
 
 	virtual void release_rendering_thread() override;
-	virtual void make_rendering_thread() override;
 	virtual void swap_buffers() override;
 
 	virtual void set_context(Context p_context) override;

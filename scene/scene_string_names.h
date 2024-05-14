@@ -99,7 +99,7 @@ public:
 	StringName RESET;
 
 	StringName pose_updated;
-	StringName bone_pose_changed;
+	StringName skeleton_updated;
 	StringName bone_enabled_changed;
 	StringName show_rest_only_changed;
 
@@ -152,7 +152,6 @@ public:
 	StringName camera_entered;
 	StringName camera_exited;
 
-	StringName changed;
 	StringName _shader_changed;
 
 	StringName _spatial_editor_group;
@@ -166,10 +165,6 @@ public:
 	StringName rotate;
 	StringName v_offset;
 	StringName h_offset;
-
-	StringName transform_pos;
-	StringName transform_rot;
-	StringName transform_scale;
 
 	StringName _update_remote;
 	StringName _update_pairs;
@@ -198,7 +193,7 @@ public:
 
 	NodePath path_pp;
 
-	StringName _default;
+	StringName default_; // "default", conflict with C++ keyword.
 
 	StringName node_configuration_warning_changed;
 
@@ -218,10 +213,14 @@ public:
 	StringName shader_overrides_group;
 	StringName shader_overrides_group_active;
 
+	StringName pressed;
+
 #ifndef DISABLE_DEPRECATED
 	StringName use_in_baked_light;
 	StringName use_dynamic_gi;
 #endif
 };
+
+#define SceneStringName(m_name) SceneStringNames::get_singleton()->m_name
 
 #endif // SCENE_STRING_NAMES_H

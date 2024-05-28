@@ -739,7 +739,7 @@ if not env.msvc:
 else:
     # MSVC doesn't have clear C standard support, /std only covers C++.
     # We apply it to CCFLAGS (both C and C++ code) in case it impacts C features.
-    env.Prepend(CCFLAGS=["/std:c++17"])
+    env.Prepend(CCFLAGS=["/std:c++17", "/FS"])
 
 # Disable exception handling. Godot doesn't use exceptions anywhere, and this
 # saves around 20% of binary size and very significant build time (GH-80513).

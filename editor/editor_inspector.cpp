@@ -29,6 +29,7 @@
 /**************************************************************************/
 
 #include "editor_inspector.h"
+#include "editor_inspector.compat.inc"
 
 #include "core/os/keyboard.h"
 #include "editor/doc_tools.h"
@@ -1128,11 +1129,12 @@ void EditorInspectorPlugin::add_custom_control(Control *control) {
 	added_editors.push_back(ae);
 }
 
-void EditorInspectorPlugin::add_property_editor(const String &p_for_property, Control *p_prop, bool p_add_to_end) {
+void EditorInspectorPlugin::add_property_editor(const String &p_for_property, Control *p_prop, bool p_add_to_end, const String &p_label) {
 	AddedEditor ae;
 	ae.properties.push_back(p_for_property);
 	ae.property_editor = p_prop;
 	ae.add_to_end = p_add_to_end;
+	ae.label = p_label;
 	added_editors.push_back(ae);
 }
 
@@ -1174,7 +1176,7 @@ void EditorInspectorPlugin::parse_end(Object *p_object) {
 
 void EditorInspectorPlugin::_bind_methods() {
 	ClassDB::bind_method(D_METHOD("add_custom_control", "control"), &EditorInspectorPlugin::add_custom_control);
-	ClassDB::bind_method(D_METHOD("add_property_editor", "property", "editor", "add_to_end"), &EditorInspectorPlugin::add_property_editor, DEFVAL(false));
+	ClassDB::bind_method(D_METHOD("add_property_editor", "property", "editor", "add_to_end", "label"), &EditorInspectorPlugin::add_property_editor, DEFVAL(false), DEFVAL(String()));
 	ClassDB::bind_method(D_METHOD("add_property_editor_for_multiple_properties", "label", "properties", "editor"), &EditorInspectorPlugin::add_property_editor_for_multiple_properties);
 
 	GDVIRTUAL_BIND(_can_handle, "object")
@@ -2727,6 +2729,8 @@ void EditorInspector::update_tree() {
 	// TODO: Can be useful to store more context for the focusable, such as the caret position in LineEdit.
 	StringName current_selected = property_selected;
 	int current_focusable = -1;
+	// Temporarily disable focus following to avoid jumping while the inspector is updating.
+	set_follow_focus(false);
 
 	if (property_focusable != -1) {
 		// Check that focusable is actually focusable.
@@ -3482,6 +3486,7 @@ void EditorInspector::update_tree() {
 		// Updating inspector might invalidate some editing owners.
 		EditorNode::get_singleton()->hide_unused_editors();
 	}
+	set_follow_focus(true);
 }
 
 void EditorInspector::update_property(const String &p_prop) {
@@ -3779,7 +3784,6 @@ void EditorInspector::_edit_set(const String &p_name, const Variant &p_value, bo
 		}
 
 		emit_signal(_prop_edited, p_name);
-
 	} else if (Object::cast_to<MultiNodeEdit>(object)) {
 		Object::cast_to<MultiNodeEdit>(object)->set_property_field(p_name, p_value, p_changed_field);
 		_edit_request_change(object, p_name);
@@ -3956,7 +3960,7 @@ void EditorInspector::_property_checked(const String &p_path, bool p_checked) {
 	//property checked
 	if (autoclear) {
 		if (!p_checked) {
-			object->set(p_path, Variant());
+			_edit_set(p_path, Variant(), false, "");
 		} else {
 			Variant to_create;
 			List<PropertyInfo> pinfo;
@@ -3968,7 +3972,7 @@ void EditorInspector::_property_checked(const String &p_path, bool p_checked) {
 					break;
 				}
 			}
-			object->set(p_path, to_create);
+			_edit_set(p_path, to_create, false, "");
 		}
 
 		if (editor_property_map.has(p_path)) {
@@ -3979,7 +3983,6 @@ void EditorInspector::_property_checked(const String &p_path, bool p_checked) {
 				E->update_cache();
 			}
 		}
-
 	} else {
 		emit_signal(SNAME("property_toggled"), p_path, p_checked);
 	}

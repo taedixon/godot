@@ -3394,6 +3394,7 @@ void GDScriptAnalyzer::reduce_call(GDScriptParser::CallNode *p_call, bool p_is_a
 		}
 
 #ifdef DEBUG_ENABLED
+		// FIXME: No warning for built-in constructors and utilities due to early return.
 		if (p_is_root && return_type.kind != GDScriptParser::DataType::UNRESOLVED && return_type.builtin_type != Variant::NIL &&
 				!(p_call->is_super && p_call->function_name == GDScriptLanguage::get_singleton()->strings._init)) {
 			parser->push_warning(p_call, GDScriptWarning::RETURN_VALUE_DISCARDED, p_call->function_name);
@@ -4060,10 +4061,23 @@ void GDScriptAnalyzer::reduce_identifier(GDScriptParser::IdentifierNode *p_ident
 				mark_lambda_use_self();
 				return; // No need to capture.
 			}
-			// If the identifier is local, check if it's any kind of capture by comparing their source function.
-			// Only capture locals and enum values. Constants are still accessible from the lambda using the script reference. If not, this method is done.
-			if (p_identifier->source == GDScriptParser::IdentifierNode::UNDEFINED_SOURCE || p_identifier->source == GDScriptParser::IdentifierNode::MEMBER_CONSTANT) {
-				return;
+
+			switch (p_identifier->source) {
+				case GDScriptParser::IdentifierNode::FUNCTION_PARAMETER:
+				case GDScriptParser::IdentifierNode::LOCAL_VARIABLE:
+				case GDScriptParser::IdentifierNode::LOCAL_ITERATOR:
+				case GDScriptParser::IdentifierNode::LOCAL_BIND:
+					break; // Need to capture.
+				case GDScriptParser::IdentifierNode::UNDEFINED_SOURCE: // A global.
+				case GDScriptParser::IdentifierNode::LOCAL_CONSTANT:
+				case GDScriptParser::IdentifierNode::MEMBER_VARIABLE:
+				case GDScriptParser::IdentifierNode::MEMBER_CONSTANT:
+				case GDScriptParser::IdentifierNode::MEMBER_FUNCTION:
+				case GDScriptParser::IdentifierNode::MEMBER_SIGNAL:
+				case GDScriptParser::IdentifierNode::MEMBER_CLASS:
+				case GDScriptParser::IdentifierNode::INHERITED_VARIABLE:
+				case GDScriptParser::IdentifierNode::STATIC_VARIABLE:
+					return; // No need to capture.
 			}
 
 			GDScriptParser::FunctionNode *function_test = current_lambda->function;

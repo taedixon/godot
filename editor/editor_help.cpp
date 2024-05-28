@@ -1967,7 +1967,7 @@ void EditorHelp::_update_doc() {
 
 					class_desc->add_text(argument.name);
 					class_desc->add_text(": ");
-					_add_type(argument.type);
+					_add_type(argument.type, argument.enumeration, argument.is_bitfield);
 
 					if (!argument.default_value.is_empty()) {
 						class_desc->push_color(theme_cache.symbol_color);
@@ -2890,7 +2890,7 @@ void EditorHelp::_load_doc_thread(void *p_udata) {
 		callable_mp_static(&EditorHelp::_gen_extensions_docs).call_deferred();
 	} else {
 		// We have to go back to the main thread to start from scratch, bypassing any possibly existing cache.
-		callable_mp_static(&EditorHelp::generate_doc).bind(false).call_deferred();
+		callable_mp_static(&EditorHelp::generate_doc).call_deferred(false);
 	}
 
 	OS::get_singleton()->benchmark_end_measure("EditorHelp", vformat("Generate Documentation (Run %d)", doc_generation_count));

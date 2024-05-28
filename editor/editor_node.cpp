@@ -3533,7 +3533,6 @@ void EditorNode::add_extension_editor_plugin(const StringName &p_class_name) {
 	EditorPlugin *plugin = Object::cast_to<EditorPlugin>(ClassDB::instantiate(p_class_name));
 	singleton->editor_data.add_extension_editor_plugin(p_class_name, plugin);
 	add_editor_plugin(plugin);
-	plugin->enable_plugin();
 }
 
 void EditorNode::remove_extension_editor_plugin(const StringName &p_class_name) {
@@ -5542,7 +5541,7 @@ void EditorNode::_add_dropped_files_recursive(const Vector<String> &p_files, Str
 }
 
 void EditorNode::_file_access_close_error_notify(const String &p_str) {
-	callable_mp_static(&EditorNode::_file_access_close_error_notify_impl).bind(p_str).call_deferred();
+	callable_mp_static(&EditorNode::_file_access_close_error_notify_impl).call_deferred(p_str);
 }
 
 void EditorNode::_file_access_close_error_notify_impl(const String &p_str) {
@@ -6164,7 +6163,7 @@ static Node *_resource_get_edited_scene() {
 }
 
 void EditorNode::_print_handler(void *p_this, const String &p_string, bool p_error, bool p_rich) {
-	callable_mp_static(&EditorNode::_print_handler_impl).bind(p_string, p_error, p_rich).call_deferred();
+	callable_mp_static(&EditorNode::_print_handler_impl).call_deferred(p_string, p_error, p_rich);
 }
 
 void EditorNode::_print_handler_impl(const String &p_string, bool p_error, bool p_rich) {
@@ -6297,6 +6296,14 @@ EditorNode::EditorNode() {
 	if (!EditorSettings::get_singleton()) {
 		EditorSettings::create();
 	}
+
+	ED_SHORTCUT("editor/lock_selected_nodes", TTR("Lock Selected Node(s)"), KeyModifierMask::CMD_OR_CTRL | Key::L);
+	ED_SHORTCUT("editor/unlock_selected_nodes", TTR("Unlock Selected Node(s)"), KeyModifierMask::CMD_OR_CTRL | KeyModifierMask::SHIFT | Key::L);
+	ED_SHORTCUT("editor/group_selected_nodes", TTR("Group Selected Node(s)"), KeyModifierMask::CMD_OR_CTRL | Key::G);
+	ED_SHORTCUT("editor/ungroup_selected_nodes", TTR("Ungroup Selected Node(s)"), KeyModifierMask::CMD_OR_CTRL | KeyModifierMask::SHIFT | Key::G);
+
+	// Used in the GPUParticles/CPUParticles 2D/3D editor plugins.
+	ED_SHORTCUT("particles/restart_emission", TTR("Restart Emission"), KeyModifierMask::CTRL | Key::R);
 
 	FileAccess::set_backup_save(EDITOR_GET("filesystem/on_save/safe_save_on_backup_then_rename"));
 
@@ -7273,9 +7280,7 @@ EditorNode::EditorNode() {
 	add_editor_plugin(memnew(AudioBusesEditorPlugin(audio_bus_editor)));
 
 	for (int i = 0; i < EditorPlugins::get_plugin_count(); i++) {
-		EditorPlugin *plugin = EditorPlugins::create(i);
-		add_editor_plugin(plugin);
-		plugin->enable_plugin();
+		add_editor_plugin(EditorPlugins::create(i));
 	}
 
 	for (const StringName &extension_class_name : GDExtensionEditorPlugins::get_extension_classes()) {

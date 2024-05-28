@@ -2645,7 +2645,7 @@ void EditorPropertyColor::_color_changed(const Color &p_color) {
 }
 
 void EditorPropertyColor::_popup_closed() {
-	get_edited_object()->set(get_edited_property(), last_color);
+	get_edited_object()->set(get_edited_property(), was_checked ? Variant(last_color) : Variant());
 	if (!picker->get_pick_color().is_equal_approx(last_color)) {
 		emit_changed(get_edited_property(), picker->get_pick_color(), "", false);
 	}
@@ -2653,6 +2653,7 @@ void EditorPropertyColor::_popup_closed() {
 
 void EditorPropertyColor::_picker_opening() {
 	last_color = picker->get_pick_color();
+	was_checked = !is_checkable() || is_checked();
 }
 
 void EditorPropertyColor::_notification(int p_what) {
@@ -3217,7 +3218,7 @@ void EditorPropertyResource::_open_editor_pressed() {
 	Ref<Resource> res = get_edited_property_value();
 	if (res.is_valid()) {
 		// May clear the editor so do it deferred.
-		callable_mp(EditorNode::get_singleton(), &EditorNode::edit_item).bind(res.ptr(), this).call_deferred();
+		callable_mp(EditorNode::get_singleton(), &EditorNode::edit_item).call_deferred(res.ptr(), this);
 	}
 }
 

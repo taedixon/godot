@@ -700,12 +700,11 @@ if env.msvc:
     else:
         env.Append(LINKFLAGS=["/DEBUG:NONE"])
 
-    if env["optimize"] == "speed":
+    if env["optimize"].startswith("speed"):
         env.Append(CCFLAGS=["/O2"])
         env.Append(LINKFLAGS=["/OPT:REF"])
-    elif env["optimize"] == "speed_trace":
-        env.Append(CCFLAGS=["/O2"])
-        env.Append(LINKFLAGS=["/OPT:REF", "/OPT:NOICF"])
+        if env["optimize"] == "speed_trace":
+            env.Append(LINKFLAGS=["/OPT:NOICF"])
     elif env["optimize"] == "size":
         env.Append(CCFLAGS=["/O1"])
         env.Append(LINKFLAGS=["/OPT:REF"])
@@ -716,7 +715,13 @@ else:
         # Adding dwarf-4 explicitly makes stacktraces work with clang builds,
         # otherwise addr2line doesn't understand them
         env.Append(CCFLAGS=["-gdwarf-4"])
-        if env.dev_build:
+        if methods.using_emcc(env):
+            # Emscripten only produces dwarf symbols when using "-g3".
+            env.Append(CCFLAGS=["-g3"])
+            # Emscripten linker needs debug symbols options too.
+            env.Append(LINKFLAGS=["-gdwarf-4"])
+            env.Append(LINKFLAGS=["-g3"])
+        elif env.dev_build:
             env.Append(CCFLAGS=["-g3"])
         else:
             env.Append(CCFLAGS=["-g2"])
@@ -731,17 +736,25 @@ else:
         else:
             env.Append(LINKFLAGS=["-s"])
 
+    # Linker needs optimization flags too, at least for Emscripten.
+    # For other toolchains, this _may_ be useful for LTO too to disambiguate.
+
     if env["optimize"] == "speed":
         env.Append(CCFLAGS=["-O3"])
+        env.Append(LINKFLAGS=["-O3"])
     # `-O2` is friendlier to debuggers than `-O3`, leading to better crash backtraces.
     elif env["optimize"] == "speed_trace":
         env.Append(CCFLAGS=["-O2"])
+        env.Append(LINKFLAGS=["-O2"])
     elif env["optimize"] == "size":
         env.Append(CCFLAGS=["-Os"])
+        env.Append(LINKFLAGS=["-Os"])
     elif env["optimize"] == "debug":
         env.Append(CCFLAGS=["-Og"])
+        env.Append(LINKFLAGS=["-Og"])
     elif env["optimize"] == "none":
         env.Append(CCFLAGS=["-O0"])
+        env.Append(LINKFLAGS=["-O0"])
 
 # Needs to happen after configure to handle "auto".
 if env["lto"] != "none":
@@ -998,11 +1011,12 @@ if env["vsproj"]:
     env.vs_incs = []
     env.vs_srcs = []
 
-if env["compiledb"] and env.scons_version < (4, 0, 0):
-    # Generating the compilation DB (`compile_commands.json`) requires SCons 4.0.0 or later.
-    print_error("The `compiledb=yes` option requires SCons 4.0 or later, but your version is %s." % scons_raw_version)
-    Exit(255)
-if env.scons_version >= (4, 0, 0):
+if env["compiledb"]:
+    if env.scons_version < (4, 0, 0):
+        # Generating the compilation DB (`compile_commands.json`) requires SCons 4.0.0 or later.
+        print_error("The `compiledb=yes` option requires SCons 4.0 or later, but your version is %s." % scons_raw_version)
+        Exit(255)
+
     env.Tool("compilation_db")
     env.Alias("compiledb", env.CompilationDatabase())
 
@@ -1012,13 +1026,12 @@ if env["ninja"]:
         Exit(255)
 
     SetOption("experimental", "ninja")
+    env.Tool("ninja")
 
     # By setting this we allow the user to run ninja by themselves with all
     # the flags they need, as apparently automatically running from scons
     # is way slower.
     SetOption("disable_execute_ninja", True)
-
-    env.Tool("ninja")
 
 # Threads
 if env["threads"]:
@@ -1044,9 +1057,9 @@ SConscript("platform/" + env["platform"] + "/SCsub")  # Build selected platform.
 
 # Microsoft Visual Studio Project Generation
 if env["vsproj"]:
+    methods.generate_cpp_hint_file("cpp.hint")
     env["CPPPATH"] = [Dir(path) for path in env["CPPPATH"]]
     methods.generate_vs_project(env, ARGUMENTS, env["vsproj_name"])
-    methods.generate_cpp_hint_file("cpp.hint")
 
 # Check for the existence of headers
 conf = Configure(env)

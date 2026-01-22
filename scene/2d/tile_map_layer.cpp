@@ -50,6 +50,10 @@ Callable TileMapLayer::_navmesh_source_geometry_parsing_callback;
 RID TileMapLayer::_navmesh_source_geometry_parser;
 #endif // NAVIGATION_2D_DISABLED
 
+#ifdef TOOLS_ENABLED
+#include "editor/settings/editor_settings.h"
+#endif // TOOLS_ENABLED
+
 Vector2i TileMapLayer::_coords_to_quadrant_coords(const Vector2i &p_coords, const int p_quadrant_size) const {
 	return Vector2i(
 			p_coords.x > 0 ? p_coords.x / p_quadrant_size : (p_coords.x - (p_quadrant_size - 1)) / p_quadrant_size,
@@ -2326,6 +2330,9 @@ void TileMapLayer::_update_self_texture_repeat(RS::CanvasItemTextureRepeat p_tex
 
 #ifdef TOOLS_ENABLED
 bool TileMapLayer::_edit_is_selected_on_click(const Point2 &p_point, double p_tolerance) const {
+	if (!EDITOR_GET("editors/tiles_editor/click_to_select_tilemap")) {
+		return false;
+	}
 	return tile_set.is_valid() && get_cell_source_id(local_to_map(p_point)) != TileSet::INVALID_SOURCE;
 }
 #endif

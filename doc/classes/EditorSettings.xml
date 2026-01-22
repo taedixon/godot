@@ -689,6 +689,9 @@
 		<member name="editors/tiles_editor/highlight_selected_layer" type="bool" setter="" getter="">
 			Highlight the currently selected TileMapLayer by dimming the other ones in the scene.
 		</member>
+		<member name="editors/tiles_editor/click_to_select_tilemap" type="bool" setter="" getter="">
+			If [code]true[/code] clicking a tile in a scene will select the TileMapLayer it belongs to.
+		</member>
 		<member name="editors/visual_editors/category_colors/color_color" type="Color" setter="" getter="">
 			The color of a graph node's header when it belongs to the "Color" category.
 		</member>

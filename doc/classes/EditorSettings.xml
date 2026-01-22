@@ -679,6 +679,9 @@
 		<member name="editors/shader_editor/behavior/files/restore_shaders_on_load" type="bool" setter="" getter="">
 			If [code]true[/code], reopens shader files that were open in the shader editor when the project was last closed.
 		</member>
+		<member name="editors/tiles_editor/click_to_select_tilemap" type="bool" setter="" getter="">
+			If [code]true[/code] clicking a tile in a scene will select the TileMapLayer it belongs to.
+		</member>
 		<member name="editors/tiles_editor/display_grid" type="bool" setter="" getter="">
 			If [code]true[/code], displays a grid while the TileMap editor is active. See also [member editors/tiles_editor/grid_color].
 		</member>
@@ -688,9 +691,6 @@
 		</member>
 		<member name="editors/tiles_editor/highlight_selected_layer" type="bool" setter="" getter="">
 			Highlight the currently selected TileMapLayer by dimming the other ones in the scene.
-		</member>
-		<member name="editors/tiles_editor/click_to_select_tilemap" type="bool" setter="" getter="">
-			If [code]true[/code] clicking a tile in a scene will select the TileMapLayer it belongs to.
 		</member>
 		<member name="editors/visual_editors/category_colors/color_color" type="Color" setter="" getter="">
 			The color of a graph node's header when it belongs to the "Color" category.
